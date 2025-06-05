@@ -1,0 +1,5 @@
+GKS_Katowice 3 6
+Polonia_Warszawa 5 4
+Piast_Gliwice 8 1
+Radomiak_Radom 7 3
+Cracovia 2 7

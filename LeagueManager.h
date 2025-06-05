@@ -1,13 +1,12 @@
 #pragma once
-#include <vector>
-#include "Team.h"
 
-extern std::vector<Team> teams;
-
-void addTeam();
-void addPlayer();
-void playMatch();
-void showStats();
-void saveStatsToFile();
-void importStatsFromFile();
+void wczytanieDruzyn();
+void wczytanieZawodnikow();
+int wyborZawodnika();
+void dodajDruzyne();
+void dodajZawodnika();
+void usunZawodnika();
+void edytujZawodnika();
+void pokazStatystyki();
+void zagrajMecz();
 void menu();

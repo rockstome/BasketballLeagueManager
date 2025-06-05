@@ -1,177 +1,263 @@
 #include "LeagueManager.h"
+#include "Player.h"
+#include "Team.h"
 #include <iostream>
 #include <fstream>
-#include <limits>
+#include <vector>
+#include <string>
 
-std::vector<Team> teams;
+using namespace std;
 
-void addTeam() {
-	Team team;
-	std::cout << "Enter team name: ";
-	std::getline(std::cin, team.name);
-	teams.push_back(team);
-	std::cout << "Team added.\n";
-}
+vector<Zawodnik> zawodnicy;
+vector<Druzyna> druzyny;
 
-void addPlayer() {
-	if (teams.empty()) {
-		std::cout << "No teams available. Add a team first.\n";
+void wczytanieDruzyn() {
+	ifstream plik("druzyny.txt");
+
+	if (!plik.is_open()) {
+		cerr << "Nie można otworzyć pliku!" << endl;
 		return;
 	}
-	std::cout << "Select team number:\n";
-	for (size_t i = 0; i < teams.size(); ++i)
-		std::cout << i + 1 << ". " << teams[i].name << "\n";
-	size_t idx;
-	std::cin >> idx;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	if (idx < 1 || idx > teams.size()) {
-		std::cout << "Invalid team number.\n";
-		return;
+
+	string nazwa;
+	int wygrane, przegrane;
+
+	// wczytanie danych do obiektów
+	while (plik >> nazwa >> wygrane >> przegrane) {
+		druzyny.emplace_back(nazwa, wygrane, przegrane);
 	}
-	Player player;
-	std::cout << "Enter player name: ";
-	std::getline(std::cin, player.name);
-	player.points = 0;
-	teams[idx - 1].players.push_back(player);
-	std::cout << "Player added.\n";
+	plik.close();
 }
 
-void playMatch() {
-	if (teams.size() < 2) {
-		std::cout << "Not enough teams to play a match.\n";
+
+void wczytanieZawodnikow() {
+	ifstream plik("zawodnicy.txt");
+
+	if (!plik.is_open()) {
+		cerr << "Nie można otworzyć pliku!" << endl;
 		return;
 	}
-	std::cout << "Select first team number:\n";
-	for (size_t i = 0; i < teams.size(); ++i)
-		std::cout << i + 1 << ". " << teams[i].name << "\n";
-	size_t idx1, idx2;
-	std::cin >> idx1;
-	std::cout << "Select second team number:\n";
-	std::cin >> idx2;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	if (idx1 < 1 || idx1 > teams.size() || idx2 < 1 || idx2 > teams.size() || idx1 == idx2) {
-		std::cout << "Invalid team selection.\n";
-		return;
-	}
-	int score1, score2;
-	std::cout << "Enter score for " << teams[idx1 - 1].name << ": ";
-	std::cin >> score1;
-	std::cout << "Enter score for " << teams[idx2 - 1].name << ": ";
-	std::cin >> score2;
-	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	teams[idx1 - 1].gamesPlayed++;
-	teams[idx2 - 1].gamesPlayed++;
-	if (score1 > score2) {
-		teams[idx1 - 1].gamesWon++;
-		teams[idx2 - 1].gamesLost++;
-	}
-	else if (score2 > score1) {
-		teams[idx2 - 1].gamesWon++;
-		teams[idx1 - 1].gamesLost++;
-	}
-	std::cout << "Match recorded.\n";
-}
 
-void showStats() {
-	for (const auto& team : teams) {
-		std::cout << "Team: " << team.name << "\n";
-		std::cout << "Games Played: " << team.gamesPlayed
-			<< ", Won: " << team.gamesWon
-			<< ", Lost: " << team.gamesLost << "\n";
-		std::cout << "Players:\n";
-		for (const auto& player : team.players)
-			std::cout << "  " << player.name << ", Points: " << player.points << "\n";
-		std::cout << "----------------------\n";
-	}
-}
+	Druzyna* wsk_druzyna;
+	string imie, nazwisko, nazwa_druzyny;
+	int wiek;
 
-void saveStatsToFile() {
-	std::ofstream file("league_stats.txt");
-	for (const auto& team : teams) {
-		file << "Team: " << team.name << "\n";
-		file << "Games Played: " << team.gamesPlayed
-			<< ", Won: " << team.gamesWon
-			<< ", Lost: " << team.gamesLost << "\n";
-		file << "Players:\n";
-		for (const auto& player : team.players)
-			file << "  " << player.name << ", Points: " << player.points << "\n";
-		file << "----------------------\n";
-	}
-	file.close();
-	std::cout << "Stats saved to league_stats.txt\n";
-}
-
-void importStatsFromFile() {
-	std::ifstream file("league_stats.txt");
-	if (!file) {
-		std::cout << "Could not open league_stats.txt for reading.\n";
-		return;
-	}
-	teams.clear();
-	std::string line;
-	Team currentTeam;
-	while (std::getline(file, line)) {
-		if (line.find("Team: ") == 0) {
-			if (!currentTeam.name.empty()) {
-				teams.push_back(currentTeam);
-				currentTeam = Team();
-			}
-			currentTeam.name = line.substr(6);
-		}
-		else if (line.find("Games Played: ") == 0) {
-			int played = 0, won = 0, lost = 0;
-			sscanf_s(line.c_str(), "Games Played: %d, Won: %d, Lost: %d", &played, &won, &lost);
-			currentTeam.gamesPlayed = played;
-			currentTeam.gamesWon = won;
-			currentTeam.gamesLost = lost;
-		}
-		else if (line.find("  ") == 0) {
-			Player player;
-			size_t commaPos = line.find(", Points: ");
-			if (commaPos != std::string::npos) {
-				player.name = line.substr(2, commaPos - 2);
-				player.points = std::stoi(line.substr(commaPos + 10));
-				currentTeam.players.push_back(player);
+	// wczytanie danych do obiektów
+	while (plik >> imie >> nazwisko >> wiek >> nazwa_druzyny) {
+		for (int i = 0; i < size(druzyny); i++) {
+			if (nazwa_druzyny == druzyny[i].getNazwa_()) {
+				wsk_druzyna = &druzyny[i];
+				break;
 			}
 		}
-		else if (line.find("----------------------") == 0) {
-			if (!currentTeam.name.empty()) {
-				teams.push_back(currentTeam);
-				currentTeam = Team();
-			}
+		zawodnicy.emplace_back(imie, nazwisko, wiek, wsk_druzyna);
+	}
+
+	plik.close();
+	//for (int i = 0; i < size(zawodnicy); i++) {
+	//	cout << i + 1 << ' ';
+	//	zawodnicy[i].wypisz();
+	//}
+}
+
+
+void dodajDruzyne() {
+	string n;
+	cout << "\nDODAWANIE DRUŻYNY\n";
+	cout << "Podaj nazwę druzyny: ";
+	cin.ignore();
+	getline(cin, n);
+	for (char& znak : n) {
+		if (znak == ' ') {
+			znak = '_';
 		}
 	}
-	// Add last team if file doesn't end with separator
-	if (!currentTeam.name.empty()) {
-		teams.push_back(currentTeam);
+	ofstream plik("druzyny.txt", ios::app); // ios::app = dopisywanie na końcu pliku
+	if (plik.is_open()) {
+		druzyny.emplace_back(n, 0, 0);
+		plik << n << " 0 " << '0' << '\n';
+		cout << "Dodano drużynę" << endl;
+		plik.close();
 	}
-	file.close();
-	std::cout << "Stats imported from league_stats.txt\n";
+	else {
+		cerr << "Nie mozna otworzyc pliku do dopisania " << endl;
+	}
 }
+
+
+int wyborZawodnika() {
+// zwraca indeks zawodnika
+	int n;
+	for (int i = 0; i < size(zawodnicy); i++) {
+		cout << i + 1 << ' ';
+		zawodnicy[i].wypisz();
+	}
+	cout << "\nWybierz zawodnika: ";
+	cin >> n;
+	if (n < 1 || n > size(zawodnicy)) {
+		cout << "Zawodnik z podanym numerem nie istnieje\n";
+		menu();
+	}
+	return n-1;
+}
+
+
+void dodajZawodnika() {
+	Druzyna* wsk_druzyna;
+	string imie, nazwisko;
+	int wiek, nr_druzyny;
+	cout << "\nDODAWANIE ZAWODNIKA\n";
+	cout << "Podaj imię: ";
+	cin >> imie;
+	cout << "Podaj nazwisko: ";
+	cin >> nazwisko;
+	cout << "Podaj wiek: ";
+	cin >> wiek;
+	cout << "Wybierz drużynę:" << endl;
+	for (int i = 0; i < size(druzyny); i++) {
+		cout << i+1 << " " << druzyny[i].getNazwa() << endl;
+	}
+	cin >> nr_druzyny;
+	if (nr_druzyny < 1 || nr_druzyny > size(druzyny)) {
+		cout << "Nie ma drużny z takim numerem\n";
+		return;
+	}
+	wsk_druzyna = &druzyny[nr_druzyny-1];
+	ofstream plik("zawodnicy.txt", ios::app); // ios::app = dopisywanie na końcu pliku
+	if (plik.is_open()) {
+		zawodnicy.emplace_back(imie, nazwisko, wiek, wsk_druzyna);
+		plik << imie << " " << nazwisko << " " <<  wiek << " " << wsk_druzyna->getNazwa_() << '\n';
+		cout << "Dodano zawodnika" << endl;
+		plik.close();
+	}
+	else {
+		cerr << "Nie mozna otworzyc pliku do dopisania " << endl;
+	}
+}
+
+
+void usunZawodnika() {
+	cout << "\nUSUWANIE ZAWODNIKA\n";
+	int n = wyborZawodnika();
+	ifstream plik("zawodnicy.txt");
+	vector<string> noweLinie;
+	string linia;
+
+	while (getline(plik, linia)) {
+		// Sprawdzenie, czy linia pasuje do zawodnika
+		if (linia.find((zawodnicy[n]).getImie() + " " + (zawodnicy[n]).getNazwisko() + " ") != 0) {
+			noweLinie.push_back(linia); // dodaj tylko jeśli nie pasuje
+		}
+	}
+	plik.close();
+
+	// Nadpisanie pliku nową zawartością
+	ofstream plikWy("zawodnicy.txt", ios::trunc);
+	for (const string& l : noweLinie) {
+		plikWy << l << '\n';
+	}
+	plikWy.close();
+	zawodnicy.erase(zawodnicy.begin() + n);
+	cout << "Usunięto zawodnika\n";
+}
+
+
+void edytujZawodnika() {
+	int n, n2;
+	cout << "\nEDYCJA ZAWODNIKA\n";
+	n = wyborZawodnika();
+	cout << "1 Imie \n2 Nazwisko \n3 Wiek \n4 Drużyna\n";
+	cout << "Nr do edycji: ";
+	cin >> n2;
+	if (n2 == 1)  {
+		string imie;
+		cout << "Podaj nową wartość: ";
+		cin >> imie;
+		zawodnicy[n].edytujImie(zawodnicy[n], imie);
+	}
+	else if (n2 == 2) {
+		string nazwisko;
+		cout << "Podaj nową wartość: ";
+		cin >> nazwisko;
+		zawodnicy[n].edytujNazwisko(zawodnicy[n], nazwisko);
+	}
+	else if (n2 == 3) {
+		int wiek;
+		cout << "Podaj nową wartość: ";
+		cin >> wiek;
+		zawodnicy[n].edytujWiek(zawodnicy[n], wiek);
+	}
+	else if (n2 == 4) {
+		Druzyna* wsk_druzyna;
+		int nr_druzyny;
+		cout << "\nWybierz nową drużynę:" << endl;
+		for (int i = 0; i < size(druzyny); i++) {
+			cout << i + 1 << " " << druzyny[i].getNazwa() << endl;
+		}
+		cin >> nr_druzyny;
+		wsk_druzyna = &druzyny[nr_druzyny - 1];	
+		zawodnicy[n].edytujDruzyne(zawodnicy[n], wsk_druzyna);
+	}
+	else {
+		cout << "Podano zły numer\n";
+	}
+	//export zmienionych danych do pliku
+	ofstream plik("zawodnicy.txt");
+	if (!plik.is_open()) {
+		cerr << "Nie można otworzyć pliku" << endl;
+		return;
+	}
+	for (int i = 0; i < size(zawodnicy); i++) {
+		plik << zawodnicy[i].getImie() << " " << zawodnicy[i].getNazwisko() << " " << zawodnicy[i].getWiek() << " " << zawodnicy[i].getDruzyna()->getNazwa_() << '\n';
+	}
+	plik.close();
+}
+
+
+void pokazStatystyki(){
+	cout << "\nSTATYSTYKI (wygrane:przegrane)\n";
+	ifstream plik("druzyny.txt");
+	if (!plik.is_open()) {
+		cerr << "Nie można otworzyć pliku!" << endl;
+		return;
+	}
+	string nazwa;
+	int wygrane, przegrane;
+
+	while (plik >> nazwa >> wygrane >> przegrane) {
+		cout << nazwa << " " << wygrane << ":" << przegrane << endl;
+	}
+	plik.close();
+}
+
+
+void zagrajMecz() {
+
+}
+
 
 void menu() {
 	while (true) {
-		std::cout << "\nBasketball League Manager\n";
-		std::cout << "1. Add Team\n";
-		std::cout << "2. Add Player\n";
-		std::cout << "3. Play Match\n";
-		std::cout << "4. Show Stats\n";
-		std::cout << "5. Save Stats to File\n";
-		std::cout << "6. Import Stats from File\n";
-		std::cout << "0. Exit\n";
-		std::cout << "Choose option: ";
+		cout << "\nPolska Liga Koszykówki\n";
+		cout << "1. Zagraj mecz\n";
+		cout << "2. Pokaż statystyki drużyn\n";
+		cout << "3. Dodaj drużyne\n";
+		cout << "4. Dodaj zawodnika\n";
+		cout << "5. Usuń zawodnika\n";
+		cout << "6. Edytuj dane zawodnika\n";
+		cout << "0. Wyjście\n";
+		cout << "Wybierz opcję: ";
 		int choice;
-		std::cin >> choice;
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		cin >> choice;
 		switch (choice) {
-		case 1: addTeam(); break;
-		case 2: addPlayer(); break;
-		case 3: playMatch(); break;
-		case 4: showStats(); break;
-		case 5: saveStatsToFile(); break;
-		case 6: importStatsFromFile(); break;
+		case 1: zagrajMecz(); break;
+		case 2: pokazStatystyki(); break;
+		case 3: dodajDruzyne(); break;
+		case 4: dodajZawodnika(); break;
+		case 5: usunZawodnika(); break;
+		case 6: edytujZawodnika(); break;
 		case 0: return;
-		default: std::cout << "Invalid option.\n";
+		default: cout << "Wybór spoza zakresu\n";
 		}
 	}
 }

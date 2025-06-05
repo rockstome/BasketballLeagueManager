@@ -1,13 +1,16 @@
 #pragma once
 #include <string>
-#include <vector>
-#include "Player.h"
 
-class Team {
+
+using namespace std;
+
+class Druzyna {
+	string nazwa;
+	int wygrane = 0;
+	int przegrane = 0;
+
 public:
-	std::string name;
-	std::vector<Player> players;
-	int gamesPlayed = 0;
-	int gamesWon = 0;
-	int gamesLost = 0;
+	Druzyna(const string n, int w, int p);
+	string getNazwa();
+	string getNazwa_();
 };
