@@ -8,7 +8,7 @@
 
 using namespace std;
 
-vector<Zawodnik> zawodnicy;
+vector<Zawodnik*> zawodnicy;
 vector<Druzyna> druzyny;
 
 void wczytanieDruzyn() {
@@ -29,7 +29,6 @@ void wczytanieDruzyn() {
 	plik.close();
 }
 
-
 void wczytanieZawodnikow() {
 	ifstream plik("zawodnicy.txt");
 
@@ -38,28 +37,28 @@ void wczytanieZawodnikow() {
 		return;
 	}
 
-	Druzyna* wsk_druzyna;
-	string imie, nazwisko, nazwa_druzyny;
+	Druzyna* wsk_druzyna{};
+	string typ, imie, nazwisko, nazwa_druzyny;
 	int wiek;
 
 	// wczytanie danych do obiektów
-	while (plik >> imie >> nazwisko >> wiek >> nazwa_druzyny) {
+	while (plik >> typ >> imie >> nazwisko >> wiek >> nazwa_druzyny) {
 		for (int i = 0; i < size(druzyny); i++) {
 			if (nazwa_druzyny == druzyny[i].getNazwa_()) {
 				wsk_druzyna = &druzyny[i];
 				break;
 			}
 		}
-		zawodnicy.emplace_back(imie, nazwisko, wiek, wsk_druzyna);
+		if (typ == "A") {
+			zawodnicy.push_back(new ZawodnikAmator(imie, nazwisko, wiek, wsk_druzyna));
+		}
+		else if (typ == "Z") {
+			zawodnicy.push_back(new ZawodnikZawodowy(imie, nazwisko, wiek, wsk_druzyna));
+		}
 	}
 
 	plik.close();
-	//for (int i = 0; i < size(zawodnicy); i++) {
-	//	cout << i + 1 << ' ';
-	//	zawodnicy[i].wypisz();
-	//}
 }
-
 
 void dodajDruzyne() {
 	string n;
@@ -84,13 +83,12 @@ void dodajDruzyne() {
 	}
 }
 
-
 int wyborZawodnika() {
-// zwraca indeks zawodnika
+	// zwraca indeks zawodnika
 	int n;
 	for (int i = 0; i < size(zawodnicy); i++) {
 		cout << i + 1 << ' ';
-		zawodnicy[i].wypisz();
+		zawodnicy[i]->wypisz();
 	}
 	cout << "\nWybierz zawodnika: ";
 	cin >> n;
@@ -98,9 +96,8 @@ int wyborZawodnika() {
 		cout << "Zawodnik z podanym numerem nie istnieje\n";
 		menu();
 	}
-	return n-1;
+	return n - 1;
 }
-
 
 void dodajZawodnika() {
 	Druzyna* wsk_druzyna;
@@ -115,18 +112,41 @@ void dodajZawodnika() {
 	cin >> wiek;
 	cout << "Wybierz drużynę:" << endl;
 	for (int i = 0; i < size(druzyny); i++) {
-		cout << i+1 << " " << druzyny[i].getNazwa() << endl;
+		cout << i + 1 << " " << druzyny[i].getNazwa() << endl;
 	}
 	cin >> nr_druzyny;
 	if (nr_druzyny < 1 || nr_druzyny > size(druzyny)) {
 		cout << "Nie ma drużny z takim numerem\n";
 		return;
 	}
-	wsk_druzyna = &druzyny[nr_druzyny-1];
+	wsk_druzyna = &druzyny[nr_druzyny - 1];
+
+	cout << "Podaj typ zawodnika (1 - Amator, 2 - Zawodowy): ";
+	int typ;
+	cin >> typ;
+
+	if (typ == 1) {
+		zawodnicy.push_back(new ZawodnikAmator(imie, nazwisko, wiek, wsk_druzyna));
+	}
+	else if (typ == 2) {
+		double pensja;
+		cout << "Podaj pensję zawodnika: ";
+		cin >> pensja;
+		zawodnicy.push_back(new ZawodnikZawodowy(imie, nazwisko, wiek, wsk_druzyna));
+	}
+	else {
+		cout << "Nieznany typ zawodnika.\n";
+		return;
+	}
+
 	ofstream plik("zawodnicy.txt", ios::app); // ios::app = dopisywanie na końcu pliku
 	if (plik.is_open()) {
-		zawodnicy.emplace_back(imie, nazwisko, wiek, wsk_druzyna);
-		plik << imie << " " << nazwisko << " " <<  wiek << " " << wsk_druzyna->getNazwa_() << '\n';
+		if (typ == 1) {
+			plik << "A " << imie << " " << nazwisko << " " << wiek << " " << wsk_druzyna->getNazwa_() << '\n';
+		}
+		else {
+			plik << "Z " << imie << " " << nazwisko << " " << wiek << " " << wsk_druzyna->getNazwa_() << '\n';
+		}
 		cout << "Dodano zawodnika" << endl;
 		plik.close();
 	}
@@ -134,7 +154,6 @@ void dodajZawodnika() {
 		cerr << "Nie mozna otworzyc pliku do dopisania " << endl;
 	}
 }
-
 
 void usunZawodnika() {
 	cout << "\nUSUWANIE ZAWODNIKA\n";
@@ -145,7 +164,7 @@ void usunZawodnika() {
 
 	while (getline(plik, linia)) {
 		// Sprawdzenie, czy linia pasuje do zawodnika
-		if (linia.find((zawodnicy[n]).getImie() + " " + (zawodnicy[n]).getNazwisko() + " ") != 0) {
+		if (linia.find(zawodnicy[n]->getImie() + " " + zawodnicy[n]->getNazwisko() + " ") == string::npos) {
 			noweLinie.push_back(linia); // dodaj tylko jeśli nie pasuje
 		}
 	}
@@ -161,7 +180,6 @@ void usunZawodnika() {
 	cout << "Usunięto zawodnika\n";
 }
 
-
 void edytujZawodnika() {
 	int n, n2;
 	cout << "\nEDYCJA ZAWODNIKA\n";
@@ -169,23 +187,23 @@ void edytujZawodnika() {
 	cout << "1 Imie \n2 Nazwisko \n3 Wiek \n4 Drużyna\n";
 	cout << "Nr do edycji: ";
 	cin >> n2;
-	if (n2 == 1)  {
+	if (n2 == 1) {
 		string imie;
 		cout << "Podaj nową wartość: ";
 		cin >> imie;
-		zawodnicy[n].edytujImie(zawodnicy[n], imie);
+		zawodnicy[n]->edytujImie(*zawodnicy[n], imie);
 	}
 	else if (n2 == 2) {
 		string nazwisko;
 		cout << "Podaj nową wartość: ";
 		cin >> nazwisko;
-		zawodnicy[n].edytujNazwisko(zawodnicy[n], nazwisko);
+		zawodnicy[n]->edytujNazwisko(*zawodnicy[n], nazwisko);
 	}
 	else if (n2 == 3) {
 		int wiek;
 		cout << "Podaj nową wartość: ";
 		cin >> wiek;
-		zawodnicy[n].edytujWiek(zawodnicy[n], wiek);
+		zawodnicy[n]->edytujWiek(*zawodnicy[n], wiek);
 	}
 	else if (n2 == 4) {
 		Druzyna* wsk_druzyna;
@@ -195,8 +213,8 @@ void edytujZawodnika() {
 			cout << i + 1 << " " << druzyny[i].getNazwa() << endl;
 		}
 		cin >> nr_druzyny;
-		wsk_druzyna = &druzyny[nr_druzyny - 1];	
-		zawodnicy[n].edytujDruzyne(zawodnicy[n], wsk_druzyna);
+		wsk_druzyna = &druzyny[nr_druzyny - 1];
+		zawodnicy[n]->edytujDruzyne(*zawodnicy[n], wsk_druzyna);
 	}
 	else {
 		cout << "Podano zły numer\n";
@@ -208,13 +226,19 @@ void edytujZawodnika() {
 		return;
 	}
 	for (int i = 0; i < size(zawodnicy); i++) {
-		plik << zawodnicy[i].getImie() << " " << zawodnicy[i].getNazwisko() << " " << zawodnicy[i].getWiek() << " " << zawodnicy[i].getDruzyna()->getNazwa_() << '\n';
+		if (dynamic_cast<ZawodnikAmator*>(zawodnicy[i])) {
+			plik << "A " << zawodnicy[i]->getImie() << " " << zawodnicy[i]->getNazwisko()
+				<< " " << zawodnicy[i]->getWiek() << " " << zawodnicy[i]->getDruzyna()->getNazwa_() << '\n';
+		}
+		else if (auto zawodowy = dynamic_cast<ZawodnikZawodowy*>(zawodnicy[i])) {
+			plik << "Z " << zawodnicy[i]->getImie() << " " << zawodnicy[i]->getNazwisko()
+				<< " " << zawodnicy[i]->getWiek() << " " << zawodnicy[i]->getDruzyna()->getNazwa_() << '\n';
+		}
 	}
 	plik.close();
 }
 
-
-void pokazStatystyki(){
+void pokazStatystyki() {
 	cout << "\nSTATYSTYKI (wygrane:przegrane)\n";
 	ifstream plik("druzyny.txt");
 	if (!plik.is_open()) {
@@ -230,11 +254,67 @@ void pokazStatystyki(){
 	plik.close();
 }
 
-
 void zagrajMecz() {
+	if (druzyny.size() < 2) {
+		cout << "Musi być co najmniej 2 drużyny, aby rozegrać mecz.\n";
+		return;
+	}
 
+	cout << "\nWYBÓR DRUŻYN DO MECZU\n";
+	for (size_t i = 0; i < druzyny.size(); ++i) {
+		cout << i + 1 << ". " << druzyny[i].getNazwa() << endl;
+	}
+
+	int idx1, idx2;
+	cout << "Wybierz numer pierwszej drużyny: ";
+	cin >> idx1;
+	cout << "Wybierz numer drugiej drużyny: ";
+	cin >> idx2;
+
+	if (idx1 < 1 || idx1 > druzyny.size() || idx2 < 1 || idx2 > druzyny.size() || idx1 == idx2) {
+		cout << "Nieprawidłowy wybór drużyn.\n";
+		return;
+	}
+
+	Druzyna& druzyna1 = druzyny[idx1 - 1];
+	Druzyna& druzyna2 = druzyny[idx2 - 1];
+
+	cout << "Podaj liczbę punktów dla " << druzyna1.getNazwa() << ": ";
+	int punkty1;
+	cin >> punkty1;
+
+	cout << "Podaj liczbę punktów dla " << druzyna2.getNazwa() << ": ";
+	int punkty2;
+	cin >> punkty2;
+
+	if (punkty1 == punkty2) {
+		cout << "Remis nie jest możliwy w meczu. Podaj poprawne wyniki.\n";
+		return;
+	}
+
+	// Aktualizacja statystyk w pamięci
+	if (punkty1 > punkty2) {
+		druzyna1.dodajWygrana();
+		druzyna2.dodajPrzegrana();
+		cout << "Wygrała drużyna: " << druzyna1.getNazwa() << endl;
+	}
+	else {
+		druzyna2.dodajWygrana();
+		druzyna1.dodajPrzegrana();
+		cout << "Wygrała drużyna: " << druzyna2.getNazwa() << endl;
+	}
+
+	// Zapisz zaktualizowane statystyki do pliku
+	ofstream plik("druzyny.txt", ios::trunc);
+	if (!plik.is_open()) {
+		cerr << "Nie można otworzyć pliku do zapisu wyników!\n";
+		return;
+	}
+	for (Druzyna& d : druzyny) {
+		plik << d.getNazwa_() << " " << d.pobierzWygrane() << " " << d.pobierzPrzegrane() << '\n';
+	}
+	plik.close();
 }
-
 
 void menu() {
 	while (true) {

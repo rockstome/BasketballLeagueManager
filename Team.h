@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 
-
 using namespace std;
 
 class Druzyna {
@@ -13,4 +12,8 @@ public:
 	Druzyna(const string n, int w, int p);
 	string getNazwa();
 	string getNazwa_();
+	void dodajWygrana();
+	void dodajPrzegrana();
+	int pobierzWygrane();
+	int pobierzPrzegrane();
 };

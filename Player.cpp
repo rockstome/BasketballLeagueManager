@@ -2,35 +2,48 @@
 #include <iostream>
 
 Zawodnik::Zawodnik(const string i, const string n, int w, Druzyna* d)
-    : imie(i), nazwisko(n), wiek(w), druzyna(d) {}
+	: imie(i), nazwisko(n), wiek(w), druzyna(d) {
+}
 
 void Zawodnik::wypisz() {
-    cout << "Imie: " << imie
-        << ", Nazwisko: " << nazwisko
-        << ", Wiek: " << wiek
-        << ", Drużyna: " << druzyna->getNazwa() << endl;
+	cout << "Imie: " << imie
+		<< ", Nazwisko: " << nazwisko
+		<< ", Wiek: " << wiek
+		<< ", Drużyna: " << druzyna->getNazwa() << endl;
 }
 string Zawodnik::getImie() {
-    return imie;
+	return imie;
 }
 string Zawodnik::getNazwisko() {
-    return nazwisko;
+	return nazwisko;
 }
 int Zawodnik::getWiek() {
-    return wiek;
+	return wiek;
 }
 Druzyna* Zawodnik::getDruzyna() {
-    return druzyna;
+	return druzyna;
 }
 void Zawodnik::edytujImie(Zawodnik& z, string nowaWart) {
-    z.imie = nowaWart;
+	z.imie = nowaWart;
 }
 void Zawodnik::edytujNazwisko(Zawodnik& z, string nowaWart) {
-    z.nazwisko = nowaWart;
+	z.nazwisko = nowaWart;
 }
 void Zawodnik::edytujWiek(Zawodnik& z, int nowaWart) {
-    z.wiek = nowaWart;
+	z.wiek = nowaWart;
 }
 void Zawodnik::edytujDruzyne(Zawodnik& z, Druzyna* nowaWart) {
-    z.druzyna = nowaWart;
+	z.druzyna = nowaWart;
+}
+
+ZawodnikAmator::ZawodnikAmator(const string i, const string n, int w, Druzyna* d) : Zawodnik(i, n, w, d) {}
+void ZawodnikAmator::wypisz() {
+	cout << "Amator - ";
+	Zawodnik::wypisz();
+}
+
+ZawodnikZawodowy::ZawodnikZawodowy(const string i, const string n, int w, Druzyna* d) : Zawodnik(i, n, w, d) {}
+void ZawodnikZawodowy::wypisz() {
+	cout << "Zawodowy - ";
+	Zawodnik::wypisz();
 }

@@ -1,25 +1,26 @@
-Jan Kowalski 25 GKS_Katowice
-Tomasz Czarnecki 31 GKS_Katowice
-Kamil Kwiatkowski 28 GKS_Katowice
-Jakub Michalak 35 GKS_Katowice
-Pawel Urbaniak 32 GKS_Katowice
-Artur Krupa 34 Polonia_Warszawa
-Grzegorz Walczak 36 Polonia_Warszawa
-Lukasz Bednarek 29 Polonia_Warszawa
-Bartek Nowicki 27 Polonia_Warszawa
-Mateusz Sikora 31 Polonia_Warszawa
-Dominik Borkowski 24 Piast_Gliwice
-Rafal Marciniak 30 Piast_Gliwice
-Krzysztof Stolarz 28 Piast_Gliwice
-Damian Rutkowski 35 Piast_Gliwice
-Sebastian Kalinowski 29 Piast_Gliwice
-Patryk Sawicki 27 Radomiak_Radom
-Daniel Majewski 28 Radomiak_Radom
-Maciej Dobrowolski 32 Radomiak_Radom
-Oskar Krajewski 26 Radomiak_Radom
-Igor Witkowski 30 Radomiak_Radom
-Norbert Sadowski 33 Cracovia
-Bartosz Kowalczyk 25 Cracovia
-Konrad Wolski 27 Cracovia
-Emil Zalewski 30 Cracovia
-Piotr Trojanowski 25 Cracovia
+A Adam Kowalski 25 GKS_Katowice
+Z Tomasz Czarnecki 31 GKS_Katowice
+Z Kamil Kwiatkowski 28 GKS_Katowice
+Z Jakub Michalak 35 GKS_Katowice
+Z Pawel Urbaniak 32 GKS_Katowice
+Z Artur Krupa 34 Polonia_Warszawa
+A Grzegorz Walczak 36 Polonia_Warszawa
+Z Lukasz Bednarek 29 Polonia_Warszawa
+Z Bartek Nowicki 27 Polonia_Warszawa
+Z Mateusz Sikora 31 Polonia_Warszawa
+Z Dominik Borkowski 24 Piast_Gliwice
+Z Rafal Marciniak 30 Piast_Gliwice
+Z Krzysztof Stolarz 28 Piast_Gliwice
+Z Damian Rutkowski 35 Piast_Gliwice
+Z Sebastian Kalinowski 29 Piast_Gliwice
+Z Patryk Sawicki 27 Radomiak_Radom
+A Daniel Majewski 28 Radomiak_Radom
+Z Maciej Dobrowolski 32 Radomiak_Radom
+Z Oskar Krajewski 26 Radomiak_Radom
+Z Igor Witkowski 30 Radomiak_Radom
+Z Norbert Sadowski 33 Cracovia
+Z Bartosz Kowalczyk 25 Cracovia
+Z Konrad Wolski 27 Cracovia
+Z Emil Zalewski 30 Cracovia
+Z Piotr Trojanowski 25 Cracovia
+A Tomasz Solarz 36 Cracovia
